@@ -2,7 +2,7 @@
 #define COMMANDS_HPP
 #include <iostream>
 #include <string>
-#include "BinarySearchTree.hpp"
+#include <UBST/BinarySearchTree.hpp>
 
 namespace nikonov
 {
