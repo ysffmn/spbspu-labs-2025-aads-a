@@ -6,7 +6,7 @@ namespace nikonov
 {
   struct KeySum
   {
-    long long int res;
+    long long int res = 0;
     std::string elems;
 
     void operator()(std::pair< long long int, std::string > p);
