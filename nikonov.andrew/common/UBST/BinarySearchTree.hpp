@@ -4,6 +4,7 @@
 #include "BiTreeNode.hpp"
 #include <stdexcept>
 #include <utility>
+#include <queue>
 
 namespace nikonov
 {
@@ -34,6 +35,15 @@ namespace nikonov
 
     ConstBiTreeIterator< Key, Value > find(const Key& k) const;
 
+    template < typename F >
+    F traverse_lnr(F f) const;
+
+    template < typename F >
+    F traverse_rnl(F f) const;
+
+    template < typename F >
+    F traverse_breadth(F f) const;
+
   private:
     using value_type = std::pair< Key, Value >;
     detail::BiTreeNode< Key, Value >* root_;
@@ -47,7 +57,12 @@ namespace nikonov
     void copyTree(detail::BiTreeNode< Key, Value >*& node, detail::BiTreeNode< Key, Value >* otherNode, detail::BiTreeNode< Key, Value >* parent);
 
     detail::BiTreeNode< Key, Value >* findMin(detail::BiTreeNode< Key, Value >* node) const;
-    detail::BiTreeNode< Key, Value >* findMax(detail::BiTreeNode< Key, Value >* node) const;
+
+    template< typename F >
+    F traverseLNRRecursive(detail::BiTreeNode< Key, Value >* node, F f) const;
+
+    template< typename F >
+    F traverseRNLRecursive(detail::BiTreeNode< Key, Value >* node, F f) const;
   };
 
   template< typename Key, typename Value, typename Compare >
@@ -218,20 +233,6 @@ namespace nikonov
   }
 
   template< typename Key, typename Value, typename Compare >
-  detail::BiTreeNode< Key, Value >* nikonov::BinarySearchTree< Key, Value, Compare >::findMax(detail::BiTreeNode< Key, Value >* node) const
-  {
-    if (node == nullptr)
-    {
-      return nullptr;
-    }
-    while (node->right != nullptr)
-    {
-      node = node->right;
-    }
-    return node;
-  }
-
-  template< typename Key, typename Value, typename Compare >
   void nikonov::BinarySearchTree< Key, Value, Compare >::clearNode(detail::BiTreeNode< Key, Value >* node)
   {
     if (!node)
@@ -326,6 +327,74 @@ namespace nikonov
       --size_;
       throw;
     }
+  }
+  template< typename Key, typename Value, typename Compare >
+  template< typename F >
+  F BinarySearchTree< Key, Value, Compare >::traverseLNRRecursive(detail::BiTreeNode< Key, Value >* node, F f) const
+  {
+    if (node == nullptr)
+    {
+      return f;
+    }
+    f = traverseLNRRecursive(node->left, f);
+    f(node->data);
+    f = traverseLNRRecursive(node->right, f);
+    return f;
+  }
+
+  template< typename Key, typename Value, typename Compare >
+  template< typename F >
+  F BinarySearchTree< Key, Value, Compare >::traverse_lnr(F f) const
+  {
+    return traverseLNRRecursive(root_, f);
+  }
+
+  template< typename Key, typename Value, typename Compare >
+  template< typename F >
+  F BinarySearchTree< Key, Value, Compare >::traverse_rnl(F f) const
+  {
+    return traverseRNLRecursive(root_, f);
+  }
+
+  template< typename Key, typename Value, typename Compare >
+  template< typename F >
+  F BinarySearchTree< Key, Value, Compare >::traverse_breadth(F f) const
+  {
+    if (root_ == nullptr)
+    {
+      return f;
+    }
+    std::queue< detail::BiTreeNode< Key, Value >* > nodeQueue;
+    nodeQueue.push(root_);
+    while (!nodeQueue.empty())
+    {
+      detail::BiTreeNode< Key, Value >* current = nodeQueue.front();
+      nodeQueue.pop();
+      f(current->data);
+      if (current->left != nullptr)
+      {
+        nodeQueue.push(current->left);
+      }
+      if (current->right != nullptr)
+      {
+        nodeQueue.push(current->right);
+      }
+    }
+    return f;
+  }
+
+  template< typename Key, typename Value, typename Compare >
+  template< typename F >
+  F BinarySearchTree< Key, Value, Compare >::traverseRNLRecursive(detail::BiTreeNode< Key, Value >* node, F f) const
+  {
+    if (node == nullptr)
+    {
+      return f;
+    }
+    f = traverseRNLRecursive(node->right, f);
+    f(node->data);
+    f = traverseRNLRecursive(node->left, f);
+    return f;
   }
 }
 
