@@ -1,6 +1,5 @@
 #ifndef HASHTABLE_HPP
 #define HASHTABLE_HPP
-
 #include <functional>
 #include <stdexcept>
 #include <utility>
@@ -74,7 +73,7 @@ namespace nikonov
     size_t findIndex(const Key& key) const;
     size_t findInsertPosition(const Key& key) const;
     void checkLoadFactor();
-    size_t findNextOccupied(size_t start) const;  // Добавлен недостающий метод
+    size_t findNextOccupied(size_t start) const;
   };
 
   template< typename Key, typename Value, typename Hash, typename Equal >
@@ -113,7 +112,6 @@ namespace nikonov
     std::swap(max_load_factor_, other.max_load_factor_);
   }
 
-  // Добавлен недостающий метод для итераторов
   template< typename Key, typename Value, typename Hash, typename Equal >
   size_t HashTable< Key, Value, Hash, Equal >::findNextOccupied(size_t start) const
   {
@@ -127,7 +125,7 @@ namespace nikonov
     return table_.size();
   }
 
-  // Методы итераторов
+
   template< typename Key, typename Value, typename Hash, typename Equal >
   typename HashTable< Key, Value, Hash, Equal >::iterator HashTable< Key, Value, Hash, Equal >::begin()
   {
@@ -178,7 +176,6 @@ namespace nikonov
     return const_iterator(this, index);
   }
 
-  // Остальные методы без изменений
   template< typename Key, typename Value, typename Hash, typename Equal >
   size_t HashTable< Key, Value, Hash, Equal >::findIndex(const Key& key) const
   {
@@ -280,12 +277,11 @@ namespace nikonov
 
     checkLoadFactor();
     position = findInsertPosition(key);
-    
+
     if (position == table_.size())
     {
       throw std::runtime_error("HashTable is full");
     }
-
     table_[position].data = std::make_pair(key, Value{});
     table_[position].occupied = true;
     table_[position].deleted = false;
@@ -343,9 +339,7 @@ namespace nikonov
     {
       new_capacity = size_ * 2;
     }
-
     std::vector< Slot > new_table(new_capacity);
-
     for (const auto& slot: table_)
     {
       if (slot.occupied)
