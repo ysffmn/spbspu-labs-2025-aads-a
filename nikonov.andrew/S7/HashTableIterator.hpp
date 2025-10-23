@@ -112,7 +112,7 @@ namespace nikonov
   }
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  class HashTableConstIterator
+  class ConstHashTableIterator
   {
   public:
     using iterator_category = std::forward_iterator_tag;
@@ -122,21 +122,21 @@ namespace nikonov
     using reference = const std::pair< Key, Value >&;
     using table_type = const HashTable< Key, Value, Hash, Equal >;
 
-    HashTableConstIterator();
-    HashTableConstIterator(table_type* table, size_t index);
-    HashTableConstIterator(const HashTableConstIterator& other) = default;
-    ~HashTableConstIterator() = default;
+    ConstHashTableIterator();
+    ConstHashTableIterator(table_type* table, size_t index);
+    ConstHashTableIterator(const ConstHashTableIterator& other) = default;
+    ~ConstHashTableIterator() = default;
 
-    HashTableConstIterator& operator=(const HashTableConstIterator& other) = default;
+    ConstHashTableIterator& operator=(const ConstHashTableIterator& other) = default;
 
     reference operator*() const;
     pointer operator->() const;
 
-    HashTableConstIterator& operator++();
-    HashTableConstIterator operator++(int);
+    ConstHashTableIterator& operator++();
+    ConstHashTableIterator operator++(int);
 
-    bool operator==(const HashTableConstIterator& other) const;
-    bool operator!=(const HashTableConstIterator& other) const;
+    bool operator==(const ConstHashTableIterator& other) const;
+    bool operator!=(const ConstHashTableIterator& other) const;
 
   private:
     table_type* table_;
@@ -146,34 +146,34 @@ namespace nikonov
   };
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  HashTableConstIterator< Key, Value, Hash, Equal >::HashTableConstIterator() :
+  ConstHashTableIterator< Key, Value, Hash, Equal >::ConstHashTableIterator() :
     table_(nullptr),
     index_(0)
   {}
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  HashTableConstIterator< Key, Value, Hash, Equal >::HashTableConstIterator(table_type* table, size_t index) :
+  ConstHashTableIterator< Key, Value, Hash, Equal >::ConstHashTableIterator(table_type* table, size_t index) :
     table_(table),
     index_(index)
   {}
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  typename HashTableConstIterator< Key, Value, Hash, Equal >::reference
-  HashTableConstIterator< Key, Value, Hash, Equal >::operator*() const
+  typename ConstHashTableIterator< Key, Value, Hash, Equal >::reference
+  ConstHashTableIterator< Key, Value, Hash, Equal >::operator*() const
   {
     return table_->table_[index_].data;
   }
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  typename HashTableConstIterator< Key, Value, Hash, Equal >::pointer
-  HashTableConstIterator< Key, Value, Hash, Equal >::operator->() const
+  typename ConstHashTableIterator< Key, Value, Hash, Equal >::pointer
+  ConstHashTableIterator< Key, Value, Hash, Equal >::operator->() const
   {
     return &table_->table_[index_].data;
   }
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  HashTableConstIterator< Key, Value, Hash, Equal >&
-  HashTableConstIterator< Key, Value, Hash, Equal >::operator++()
+  ConstHashTableIterator< Key, Value, Hash, Equal >&
+  ConstHashTableIterator< Key, Value, Hash, Equal >::operator++()
   {
     if (table_ && index_ < table_->table_.size())
     {
@@ -184,28 +184,28 @@ namespace nikonov
   }
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  HashTableConstIterator< Key, Value, Hash, Equal >
-  HashTableConstIterator< Key, Value, Hash, Equal >::operator++(int)
+  ConstHashTableIterator< Key, Value, Hash, Equal >
+  ConstHashTableIterator< Key, Value, Hash, Equal >::operator++(int)
   {
-    HashTableConstIterator temp = *this;
+    ConstHashTableIterator temp = *this;
     ++(*this);
     return temp;
   }
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  bool HashTableConstIterator< Key, Value, Hash, Equal >::operator==(const HashTableConstIterator& other) const
+  bool ConstHashTableIterator< Key, Value, Hash, Equal >::operator==(const ConstHashTableIterator& other) const
   {
     return table_ == other.table_ && index_ == other.index_;
   }
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  bool HashTableConstIterator< Key, Value, Hash, Equal >::operator!=(const HashTableConstIterator& other) const
+  bool ConstHashTableIterator< Key, Value, Hash, Equal >::operator!=(const ConstHashTableIterator& other) const
   {
     return !(*this == other);
   }
 
   template< typename Key, typename Value, typename Hash, typename Equal >
-  void HashTableConstIterator< Key, Value, Hash, Equal >::advanceToNextOccupied()
+  void ConstHashTableIterator< Key, Value, Hash, Equal >::advanceToNextOccupied()
   {
     if (!table_) return;
 
