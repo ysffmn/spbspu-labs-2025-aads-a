@@ -1,22 +1,27 @@
 #ifndef HASHTABLE_HPP
 #define HASHTABLE_HPP
+
 #include <functional>
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include "HashTableIterator.hpp"
 
 namespace nikonov
 {
   template< typename Key, typename Value, typename Hash = std::hash< Key >, typename Equal = std::equal_to< Key > >
   class HashTable
   {
+    friend class HashTableIterator< Key, Value, Hash, Equal >;
+    friend class ConstHashTableIterator< Key, Value, Hash, Equal >;
+
   private:
     struct Slot
     {
       std::pair< Key, Value > data;
       bool occupied = false;
       bool deleted = false;
-      
+
       Slot() = default;
       Slot(const Key& k, const Value& v) : data(k, v), occupied(true) {}
     };
@@ -29,6 +34,8 @@ namespace nikonov
 
   public:
     using value_type = std::pair< Key, Value >;
+    using iterator = HashTableIterator< Key, Value, Hash, Equal >;
+    using const_iterator = ConstHashTableIterator< Key, Value, Hash, Equal >;
 
     HashTable();
     HashTable(const HashTable& other) = default;
@@ -51,15 +58,24 @@ namespace nikonov
     bool erase(const Key& key) noexcept;
     bool contains(const Key& key) const;
 
+    iterator begin();
+    iterator end();
+    const_iterator begin() const;
+    const_iterator end() const;
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+
+    iterator find(const Key& key);
+    const_iterator find(const Key& key) const;
+
     void rehash(size_t new_capacity);
 
   private:
     size_t findIndex(const Key& key) const;
     size_t findInsertPosition(const Key& key) const;
     void checkLoadFactor();
+    size_t findNextOccupied(size_t start) const;  // Добавлен недостающий метод
   };
-
-
 
   template< typename Key, typename Value, typename Hash, typename Equal >
   HashTable< Key, Value, Hash, Equal >::HashTable() :
@@ -97,6 +113,72 @@ namespace nikonov
     std::swap(max_load_factor_, other.max_load_factor_);
   }
 
+  // Добавлен недостающий метод для итераторов
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  size_t HashTable< Key, Value, Hash, Equal >::findNextOccupied(size_t start) const
+  {
+    for (size_t i = start; i < table_.size(); ++i)
+    {
+      if (table_[i].occupied)
+      {
+        return i;
+      }
+    }
+    return table_.size();
+  }
+
+  // Методы итераторов
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::iterator HashTable< Key, Value, Hash, Equal >::begin()
+  {
+    return iterator(this, findNextOccupied(0));
+  }
+
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::iterator HashTable< Key, Value, Hash, Equal >::end()
+  {
+    return iterator(this, table_.size());
+  }
+
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::const_iterator HashTable< Key, Value, Hash, Equal >::begin() const
+  {
+    return const_iterator(this, findNextOccupied(0));
+  }
+
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::const_iterator HashTable< Key, Value, Hash, Equal >::end() const
+  {
+    return const_iterator(this, table_.size());
+  }
+
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::const_iterator HashTable< Key, Value, Hash, Equal >::cbegin() const
+  {
+    return const_iterator(this, findNextOccupied(0));
+  }
+
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::const_iterator HashTable< Key, Value, Hash, Equal >::cend() const
+  {
+    return const_iterator(this, table_.size());
+  }
+
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::iterator HashTable< Key, Value, Hash, Equal >::find(const Key& key)
+  {
+    size_t index = findIndex(key);
+    return iterator(this, index);
+  }
+
+  template< typename Key, typename Value, typename Hash, typename Equal >
+  typename HashTable< Key, Value, Hash, Equal >::const_iterator HashTable< Key, Value, Hash, Equal >::find(const Key& key) const
+  {
+    size_t index = findIndex(key);
+    return const_iterator(this, index);
+  }
+
+  // Остальные методы без изменений
   template< typename Key, typename Value, typename Hash, typename Equal >
   size_t HashTable< Key, Value, Hash, Equal >::findIndex(const Key& key) const
   {
